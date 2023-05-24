@@ -86,7 +86,12 @@ public:
         else if (data > r->data)
             r->right = dlt(r->right, data);
         else
-            (Height(r->left) > Height(r->right)) ? r->left = dlt(r->left, r->data = [](Node *n){ while(n->right) n= n->right; return n->data; }(r->left)): r->right = dlt(r->right, r->data = [](Node *n) { while(n->left) n = n->left; return n->data; }(r->right));
+            (Height(r->left) > Height(r->right)) ? r->left = dlt(
+                                                       r->left, r->data = [](Node *n)
+                                                                { while(n->right) n= n->right; return n->data; }(r->left))
+                                                 : r->right = dlt(
+                                                       r->right, r->data = [](Node *n)
+                                                                 { while(n->left) n = n->left; return n->data; }(r->right));
         return r;
     }
     void Delete(int data)
