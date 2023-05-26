@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+
 using namespace std;
 int menu();
 class Book;
@@ -39,20 +40,21 @@ public:
         this->book = NULL;
         this->parent = this->left = this->right = NULL;
     }
-    Node(Book *book)
+    Node(Book *book, Node *parent)
     {
         this->book = book;
-        this->parent = this->left = this->right = NULL;
+        this->parent = parent;
+        this->left = this->right = NULL;
     }
 };
 class BST
 {
     Node *root;
-    Node *insert(Node *current, Book *newBook)
+    Node *insert(Node *current, Book *newBook, Node *parent)
     {
         if (current == NULL)
-            return current = new Node(newBook);
-        (current->book->getIsbn() > newBook->getIsbn()) ? current->left = insert(current->left, newBook) : current->right = insert(current->right, newBook);
+            return current = new Node(newBook, parent);
+        (current->book->getIsbn() > newBook->getIsbn()) ? current->left = insert(current->left, newBook, current) : current->right = insert(current->right, newBook, current);
         return current;
     }
     Node *search(Node *current_book, Book &book)
@@ -101,14 +103,22 @@ class BST
         return current;
     }
 
-    void Inorder(Node *r)
+    void BFS(Node *r)
     {
-        if (r)
+        if (r == NULL)
+            return;
+        queue<Node *> q;
+        q.push(r);
+        while (!q.empty())
         {
-            Inorder(r->left);
-            r->book->display();
+            Node *current = q.front();
+            current->book->display();
             cout << endl;
-            Inorder(r->right);
+            q.pop();
+            if (current->left != NULL)
+                q.push(current->left);
+            if (current->right != NULL)
+                q.push(current->right);
         }
     }
     Node *searchWithIsbn(Node *current, long long isbn)
@@ -123,7 +133,7 @@ class BST
 public:
     BST() { root = NULL; }
     ~BST() { delete root; }
-    void addBook(Book *newBook) { root = insert(root, newBook); }
+    void addBook(Book *newBook) { root = insert(root, newBook, NULL); }
     void removeBook(long long isbn) { root = dlt(root, searchWithIsbn(root, isbn)->book); }
     void updateQuantity(long long isbn, int quantity)
     {
@@ -132,7 +142,7 @@ public:
             return;
         b->book->setQuantity(quantity);
     }
-    void Print() { Inorder(root); }
+    void Print() { BFS(root); }
     Book *searchBook(long long isbn)
     {
         Node *b = searchWithIsbn(root, isbn);
