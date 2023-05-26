@@ -98,24 +98,29 @@ public:
                 delete r;
                 return NULL;
             }
-            if (r->value > value)
+            else
             {
-                r->left = recursiveDelete(r->left, value);
+                delete r;
+                return NULL;
             }
-            else if (r->value < value)
+        }
+        if (r->value > value)
+        {
+            r->left = recursiveDelete(r->left, value);
+        }
+        else if (r->value < value)
+        {
+            r->right = recursiveDelete(r->right, value);
+        }
+        else
+        {
+            if (Height(r->left) > Height(r->right))
             {
-                r->right = recursiveDelete(r->right, value);
+                r->left = recursiveDelete(r->left, r->value = inorderPred(r->right));
             }
             else
             {
-                if (Height(r->left) > Height(r->right))
-                {
-                    r->left = recursiveDelete(r->left, r->value = inorderPred(r->left));
-                }
-                else
-                {
-                    r->right = recursiveDelete(r->right, r->value = inorderSucc(r->right));
-                }
+                r->right = recursiveDelete(r->right, r->value = inorderSucc(r->left));
             }
         }
     }
