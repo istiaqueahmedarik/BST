@@ -6,22 +6,92 @@ class Node
 public:
     int value;
     Node *left, *right, *parent;
+    int height;
     Node(int value)
     {
         this->value = value;
         left = right = parent = NULL;
+        height = 1;
     }
 };
 
 class BST
 {
     Node *root;
+    int Height(Node *r)
+    {
+        return (r == NULL) ? 0 : max(Height(r->left), Height(r->right)) + 1;
+    }
+    int balanceFactor(Node *r) { return (r) ? Height(r->left) - Height(r->right) : 0; }
+    Node *LLRotation(Node *r)
+    {
+        Node *rl = r->left;
+        Node *rlr = rl->right;
 
+        rl->right = r;
+        r->left = rlr;
+        r->height = Height(r);
+        rl->height = Height(rl);
+        if (root == r)
+            root = rl;
+        return rl;
+    }
+    Node *LRRotation(Node *r)
+    {
+        Node *rl = r->left;
+        Node *rlr = rl->right;
+        rl->right = rlr->left;
+        r->left = rlr->right;
+        rlr->left = rl;
+        rlr->right = r;
+        r->height = Height(r);
+        rl->height = Height(rl);
+        rlr->height = Height(rlr);
+        if (root == r)
+            root = rlr;
+        return rlr;
+    }
+    Node *RRRotation(Node *r)
+    {
+        Node *rr = r->right;
+        Node *rrl = rr->left;
+        rr->left = r;
+        r->right = rrl;
+        r->height = Height(r);
+        rr->height = Height(rr);
+        if (root == r)
+            root = rr;
+        return rr;
+    }
+    Node *RLRotation(Node *r)
+    {
+        Node *rr = r->right;
+        Node *rrl = rr->left;
+        rr->left = rrl->right;
+        r->right = rrl->left;
+        rrl->left = rr;
+        rrl->right = r;
+        r->height = Height(r);
+        rr->height = Height(rr);
+        rrl->height = Height(rrl);
+        if (root == r)
+            root = rrl;
+        return rrl;
+    }
     Node *recursiveInsert(Node *r, int value)
     {
         if (r == NULL)
             return r = new Node(value);
         (r->value > value) ? r->left = recursiveInsert(r->left, value) : r->right = recursiveInsert(r->right, value);
+        r->height = Height(r);
+        if (balanceFactor(r) > 1 && balanceFactor(r->left) == 1)
+            return LLRotation(r);
+        if (balanceFactor(r) > 1 && balanceFactor(r->left) == -1)
+            return LRRotation(r);
+        if (balanceFactor(r) < -1 && balanceFactor(r->right) == -1)
+            return RRRotation(r);
+        if (balanceFactor(r) < -1 && balanceFactor(r->right) == 1)
+            return RLRotation(r);
         return r;
     }
 
@@ -69,7 +139,6 @@ public:
     }
     Node *Search_r(int value) { return rSearch(root, value); }
     bool isPresent(int value) { return rSearch(root, value) != NULL; }
-    int Height(Node *r) { return (r == NULL) ? 0 : max(Height(r->left), Height(r->right)) + 1; }
     int inorderSucc(Node *r)
     {
         while (r->right != NULL)
@@ -149,6 +218,5 @@ int main()
     st.insertR(20);
     st.insertR(9);
     st.insertR(5);
-    st.deleteNode(2);
     st.Print();
 }

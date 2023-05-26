@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/coding/BST",
-      "program": "d:/coding/BST/build/Debug/outDebug",
+      "cwd": "d:/coding/BST/output",
+      "program": "d:/coding/BST/output/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
