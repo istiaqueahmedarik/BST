@@ -65,17 +65,17 @@ class BST
             return current_book;
         (current_book->book->getIsbn() > book.getIsbn()) ? current_book = search(current_book->left, book) : current_book = search(current_book->right, book);
     }
-    Book *inorderSucc(Node *current)
+    Book *inorderPre(Node *current)
     {
         if (current->right == NULL)
             return current->book;
-        return inorderSucc(current->right);
+        return inorderPre(current->right);
     }
-    Book *inorderPre(Node *current)
+    Book *inorderSucc(Node *current)
     {
         if (current->left == NULL)
             return current->book;
-        return inorderPre(current->left);
+        return inorderSucc(current->left);
     }
     int Height(Node *node) { return (node == NULL) ? 0 : max(Height(node->left), Height(node->right)) + 1; }
     Node *dlt(Node *current, Book *book)
@@ -96,9 +96,9 @@ class BST
         else
         {
             if (Height(current->left) > Height(current->right))
-                current->left = dlt(current->left, current->book = inorderSucc(current->left));
+                current->left = dlt(current->left, current->book = inorderPre(current->left));
             else
-                current->right = dlt(current->right, current->book = inorderPre(current->right));
+                current->right = dlt(current->right, current->book = inorderSucc(current->right));
         }
         return current;
     }
@@ -230,7 +230,6 @@ Book *createBook()
     cout << "Enter the book's title: ";
     getline(cin, title);
     cout << "Enter the book's author: ";
-    cin.ignore();
     getline(cin, author);
     cout << "Enter the book's price: ";
     cin >> price;
