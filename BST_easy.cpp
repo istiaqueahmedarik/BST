@@ -1,159 +1,152 @@
 #include <bits/stdc++.h>
 using namespace std;
-
 class Node
 {
 public:
-    int value;
+    int val;
     Node *left, *right, *parent;
-    Node(int value)
-    {
-        this->value = value;
-        left = right = parent = NULL;
-    }
+    Node(int val, Node *parent) : val(val), left(NULL), right(NULL), parent(parent){};
 };
-
 class BST
 {
     Node *root;
 
-    Node *recursiveInsert(Node *r, int value)
-    {
-        if (r == NULL)
-            return r = new Node(value);
-        (r->value > value) ? r->left = recursiveInsert(r->left, value) : r->right = recursiveInsert(r->right, value);
-        return r;
-    }
-
 public:
-    BST() { root = NULL; }
+    BST() : root(NULL){};
     ~BST() { delete root; }
-    void insert(int value)
+
+    void insertIteratively(int val)
     {
         if (root == NULL)
         {
-            root = new Node(value);
+            root = new Node(val, NULL);
             return;
         }
-        Node *curr = root;
-        Node *prev = NULL;
-        while (curr != NULL)
+        Node *curr = root, *parent = NULL;
+        while (curr)
         {
-            prev = curr;
-            (curr->value > value) ? curr = curr->left : curr = curr->right;
+            parent = curr;
+            curr = (curr->val > val) ? curr->left : curr->right;
         }
-        if (prev->value > value)
-        {
-            prev->left = new Node(value);
-            prev->left->parent = prev;
-            return;
-        }
-        prev->right = new Node(value);
-        prev->right->parent = prev;
+        (parent->val > val) ? parent->left = new Node(val, parent) : parent->right = new Node(val, parent);
     }
-    Node *Search(int value)
+    Node *insertRecursively(Node *curr, int val, Node *parent)
     {
-        Node *temp = root;
-        while (temp != NULL, (value > temp->value) ? temp = temp->right : temp = temp->left)
-            if (value == temp->value)
-                return temp;
-        return NULL;
-    }
-    Node *rSearch(Node *r, int value)
-    {
-        if (r == NULL)
-            return NULL;
-        if (r->value == value)
-            return r;
-        (r->value > value) ? r = rSearch(r->left, value) : r = rSearch(r->right, value);
-    }
-    Node *Search_r(int value) { return rSearch(root, value); }
-    bool isPresent(int value) { return rSearch(root, value) != NULL; }
-    int Height(Node *r) { return (r == NULL) ? 0 : max(Height(r->left), Height(r->right)) + 1; }
-    int inorderSucc(Node *r)
-    {
-        while (r->right != NULL)
-        {
-            r = r->right;
-        }
-        return r->value;
-    }
-    int inorderPred(Node *r)
-    {
-        while (r->left != NULL)
-        {
-            r = r->left;
-        }
-        return r->value;
-    }
-    Node *recursiveDelete(Node *r, int value)
-    {
-        if (r == NULL)
-            return NULL;
-        if (r->left == NULL && r->right == NULL)
-        {
-            if (r == root)
-            {
-                root = NULL;
-                delete r;
-                return NULL;
-            }
-            else
-            {
-                delete r;
-                return NULL;
-            }
-        }
-        if (r->value > value)
-        {
-            r->left = recursiveDelete(r->left, value);
-        }
-        else if (r->value < value)
-        {
-            r->right = recursiveDelete(r->right, value);
-        }
+        if (curr == NULL)
+            return curr = new Node(val, parent);
+        if (curr->val > val)
+            curr->left = insertRecursively(curr->left, val, curr);
         else
+            curr->right = insertRecursively(curr->right, val, curr);
+        return curr;
+    }
+    void insertRecursively(int val)
+    {
+        root = insertRecursively(root, val, NULL);
+    }
+    Node *search(Node *curr, int val)
+    {
+        if (curr == NULL || curr->val == val)
+            return curr;
+        return search((curr->val > val) ? curr->left : curr->right, val);
+    }
+    bool isPresent(int val) { return search(root, val) != NULL; }
+    Node *inSucc(Node *curr) { return curr->right ? inSucc(curr->right) : curr; }
+    Node *inPre(Node *curr) { return curr->left ? inPre(curr->left) : curr; }
+    int height(Node *curr) { return curr ? max(height(curr->left), height(curr->right)) + 1 : 0; }
+    int status(Node *curr)
+    {
+        if (curr == NULL)
+            return -1;
+        if (curr->left == NULL && curr->right == NULL)
+            return 0;
+        if (curr->left == NULL || curr->right == NULL)
+            return 1;
+        return 2;
+    }
+    void deleteLeaf(Node *curr)
+    {
+        if (curr == root)
+            root = NULL;
+        if (curr->parent->left == curr)
+            curr->parent->left = NULL;
+        else
+            curr->parent->right = NULL;
+        delete curr;
+    }
+    void deleteSingleChild(Node *curr)
+    {
+        if (curr->left)
         {
-            if (Height(r->left) > Height(r->right))
+            if (curr == root)
             {
-                r->left = recursiveDelete(r->left, r->value = inorderPred(r->right));
+                root = curr->left;
+                return;
             }
+            if (curr->parent->left == curr)
+                curr->parent->left = curr->left;
             else
-            {
-                r->right = recursiveDelete(r->right, r->value = inorderSucc(r->left));
-            }
+                curr->parent->right = curr->left;
+            delete curr;
+            return;
         }
-    }
-    void Print()
-    {
-        Inorder(root);
-    }
-    void Inorder(Node *r)
-    {
-        if (r)
+        if (curr == root)
         {
-            Inorder(r->left);
-            cout << r->value << " ";
-            Inorder(r->right);
+            root = curr->right;
+            return;
         }
+        if (curr->parent->right == curr)
+            curr->parent->right = curr->right;
+        else
+            curr->parent->left = curr->right;
+        delete curr;
     }
-    void deleteNode(int value)
+    void deleteNode(Node *curr)
     {
-        root = recursiveDelete(root, value);
+        if (status(curr) == 0)
+        {
+            deleteLeaf(curr);
+            return;
+        }
+        else if (status(curr) == 1)
+        {
+            deleteSingleChild(curr);
+            return;
+        }
+        if (height(curr->left) > height(curr->right))
+        {
+            Node *pre = inPre(curr);
+            curr->val = pre->val;
+            deleteNode(pre);
+            return;
+        }
+        Node *succ = inSucc(curr);
+        curr->val = succ->val;
+        deleteNode(succ);
     }
-    void insertR(int value)
+    void deleteNode(int val)
     {
-        root = recursiveInsert(root, value);
+        Node *curr = search(root, val);
+        if (curr)
+            deleteNode(curr);
     }
+    void inorder(Node *curr)
+    {
+        if (curr == NULL)
+            return;
+        inorder(curr->left);
+        cout << curr->val << " ";
+        inorder(curr->right);
+    }
+    void print() { inorder(root); }
 };
 int main()
 {
-    BST st;
-    st.insertR(2);
-    st.insertR(2);
-    st.insertR(20);
-    st.insertR(9);
-    st.insertR(5);
-    st.deleteNode(2);
-    st.Print();
+    BST b;
+    b.insertRecursively(100);
+    b.insertRecursively(120);
+    b.insertRecursively(110);
+    b.insertRecursively(115);
+    b.deleteNode(120);
+    b.print();
 }
