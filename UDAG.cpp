@@ -3,18 +3,23 @@ using namespace std;
 const int white = 0;
 const int gray = 1;
 const int black = 2;
-map<int, vector<int>> adjList;
 map<int, int> color;
-void dfs(int node)
+map<int, vector<int>> adjList;
+bool isCycle(int u, int parent)
 {
-    color[node] = gray;
-    cout << node << " ";
-    for (int adjacent : adjList[node])
+    color[u] = gray;
+    for (int v : adjList[u])
     {
-        if (color[adjacent] == white)
-            dfs(adjacent);
+        if (color[v] == white)
+        {
+            if (isCycle(v, u))
+                return true;
+        }
+        else if (v != parent)
+            return true;
     }
-    color[node] = black;
+    color[u] = black;
+    return false;
 }
 int main()
 {
@@ -31,5 +36,8 @@ int main()
     }
     int src;
     cin >> src;
-    dfs(src);
+    if (isCycle(src, -1))
+        cout << "YES!!" << endl;
+    else
+        cout << "NO!!" << endl;
 }
